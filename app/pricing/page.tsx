@@ -66,7 +66,12 @@ export default function PricingPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-16">
             {PRICING.map((plan, i) => (
-              <PricingCard key={plan.id} {...plan} index={i} />
+              <PricingCard 
+                key={plan.id} 
+                {...plan} 
+                features={[...plan.features]} 
+                index={i} 
+              />
             ))}
           </div>
 
