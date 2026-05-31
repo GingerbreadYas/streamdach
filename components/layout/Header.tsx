@@ -6,16 +6,25 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ChevronDown, Zap } from 'lucide-react'
 import { NAV_LINKS, BRAND } from '@/lib/constants'
 
-// Create a local interface layout to safely map variant union types
-interface NavLinkWithChildren {
-  label: string;
-  href?: string;
-  children: readonly { href: string; label: string }[];
+// Define explicit interfaces to match your constants schema
+interface DirectLink {
+  readonly label: string;
+  readonly href: string;
+}
+
+interface DropdownLink {
+  readonly label: string;
+  readonly children: readonly { readonly href: string; readonly label: string }[];
 }
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+
+  // Explicit Type Guard to split union members safely
+  const isDirectLink = (link: any): link is DirectLink => {
+    return typeof link.href === 'string';
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-brand-black/80 backdrop-blur-xl border-b border-white/5">
@@ -31,55 +40,49 @@ export default function Header() {
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1">
-            {NAV_LINKS.map((link) => {
-              // Safe type checker to determine if children exist on this specific array member
-              const hasChildren = 'children' in link && Array.isArray(link.children);
-              const linkWithChildren = link as NavLinkWithChildren;
+            {NAV_LINKS.map((link) => (
+              <div 
+                key={link.label} 
+                className="relative"
+                onMouseEnter={() => !isDirectLink(link) && setOpenDropdown(link.label)}
+                onMouseLeave={() => setOpenDropdown(null)}
+              >
+                {isDirectLink(link) ? (
+                  <Link
+                    href={link.href}
+                    className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <button className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors rounded-lg hover:bg-white/5 flex items-center gap-1">
+                    {link.label}
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                )}
 
-              return (
-                <div 
-                  key={link.label} 
-                  className="relative"
-                  onMouseEnter={() => hasChildren && setOpenDropdown(link.label)}
-                  onMouseLeave={() => setOpenDropdown(null)}
-                >
-                  {link.href ? (
-                    <Link
-                      href={link.href}
-                      className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors rounded-lg hover:bg-white/5"
+                <AnimatePresence>
+                  {!isDirectLink(link) && openDropdown === link.label && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute top-full left-0 mt-2 w-56 glass-card p-2"
                     >
-                      {link.label}
-                    </Link>
-                  ) : (
-                    <button className="px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white transition-colors rounded-lg hover:bg-white/5 flex items-center gap-1">
-                      {link.label}
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
+                      {link.children.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className="block px-4 py-3 text-sm text-zinc-300 hover:text-brand-blue hover:bg-white/5 rounded-lg transition-colors"
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </motion.div>
                   )}
-
-                  <AnimatePresence>
-                    {hasChildren && openDropdown === link.label && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-0 mt-2 w-56 glass-card p-2"
-                      >
-                        {linkWithChildren.children.map((child) => (
-                          <Link
-                            key={child.href}
-                            href={child.href}
-                            className="block px-4 py-3 text-sm text-zinc-300 hover:text-brand-blue hover:bg-white/5 rounded-lg transition-colors"
-                          >
-                            {child.label}
-                          </Link>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )
-            })}
+                </AnimatePresence>
+              </div>
+            ))}
           </nav>
 
           <div className="hidden lg:flex items-center gap-4">
@@ -111,36 +114,33 @@ export default function Header() {
             className="lg:hidden bg-brand-dark border-b border-white/5 overflow-hidden"
           >
             <div className="px-4 py-6 space-y-4">
-              {NAV_LINKS.map((link) => {
-                const hasChildren = 'children' in link && Array.isArray(link.children);
-                const linkWithChildren = link as NavLinkWithChildren;
-
-                return (
-                  <div key={link.label}>
-                    {link.href ? (
-                      <Link
-                        href={link.href}
-                        onClick={() => setMobileOpen(false)}
-                        className="block text-lg font-medium text-zinc-300 hover:text-white py-2"
-                      >
-                        {link.label}
-                      </Link>
-                    ) : (
+              {NAV_LINKS.map((link) => (
+                <div key={link.label}>
+                  {isDirectLink(link) ? (
+                    <Link
+                      href={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="block text-lg font-medium text-zinc-300 hover:text-white py-2"
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <>
                       <div className="text-lg font-medium text-zinc-400 py-2">{link.label}</div>
-                    )}
-                    {hasChildren && linkWithChildren.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        onClick={() => setMobileOpen(false)}
-                        className="block text-sm text-zinc-500 hover:text-brand-blue py-2 pl-4"
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
-                  </div>
-                )
-              })}
+                      {link.children.map((child) => (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={() => setMobileOpen(false)}
+                          className="block text-sm text-zinc-500 hover:text-brand-blue py-2 pl-4"
+                        >
+                          {child.label}
+                        </Link>
+                      ))}
+                    </>
+                  )}
+                </div>
+              ))}
               <Link
                 href={BRAND.whatsappLink}
                 target="_blank"
