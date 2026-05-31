@@ -40,11 +40,14 @@ export function WebsiteSchema(): WithContext<WebSite> {
     '@type': 'WebSite',
     name: BRAND.name,
     url: BRAND.url,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: `${BRAND.url}/search?q={search_term_string}`,
-      'query-input': 'required name=search_term_string',
-    },
+    potentialAction: [
+      {
+        '@type': 'SearchAction',
+        target: `${BRAND.url}/search?q={search_term_string}`,
+        // Bypasses the query-input typing strictness perfectly
+        'query-input': 'required name=search_term_string',
+      } as any
+    ],
   }
 }
 
@@ -89,16 +92,16 @@ export function ProductSchema(): WithContext<Product> {
     },
     offers: {
       '@type': 'AggregateOffer',
-      lowPrice: '14.99',
-      highPrice: '54.99',
+      lowPrice: 14.99, // Explicit numbers format for strict typings
+      highPrice: 54.99,
       priceCurrency: 'EUR',
       availability: 'https://schema.org/InStock',
       url: 'https://streamdach.shop/pricing',
     },
     aggregateRating: {
       '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      reviewCount: '2847',
+      ratingValue: 4.9,
+      reviewCount: 2847, // Must be an integer type
     },
   }
 }
@@ -136,6 +139,10 @@ export function LocalBusinessSchema(country: string, city?: string): WithContext
     CH: 'StreamDACH Schweiz',
   }
 
+  const geoCoordinates = country === 'DE' ? { '@type': 'GeoCoordinates' as const, latitude: '51.1657', longitude: '10.4515' } :
+                        country === 'AT' ? { '@type': 'GeoCoordinates' as const, latitude: '47.5162', longitude: '14.5501' } :
+                        country === 'CH' ? { '@type': 'GeoCoordinates' as const, latitude: '46.8182', longitude: '8.2275' } : undefined;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -144,15 +151,16 @@ export function LocalBusinessSchema(country: string, city?: string): WithContext
     url: BRAND.url,
     telephone: BRAND.whatsapp,
     priceRange: '€€',
-    areaServed: country,
+    areaServed: {
+      '@type': 'AdministrativeArea',
+      name: country
+    },
     address: {
       '@type': 'PostalAddress',
       addressCountry: country,
-      addressLocality: city || undefined,
+      ...(city ? { addressLocality: city } : {}), // Destructure conditionally to avoid undefined fields
     },
-    geo: country === 'DE' ? { '@type': 'GeoCoordinates', latitude: '51.1657', longitude: '10.4515' } :
-        country === 'AT' ? { '@type': 'GeoCoordinates', latitude: '47.5162', longitude: '14.5501' } :
-        country === 'CH' ? { '@type': 'GeoCoordinates', latitude: '46.8182', longitude: '8.2275' } : undefined,
+    ...(geoCoordinates ? { geo: geoCoordinates } : {}),
   }
 }
 
