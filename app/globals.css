@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #050505;
+    --foreground: #fafafa;
+    --card: #111118;
+    --card-border: rgba(255,255,255,0.08);
+    --primary: #00f0ff;
+    --primary-dark: #00c8d6;
+    --muted: #a1a1aa;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-brand-black text-white antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  ::selection {
+    background: rgba(0, 240, 255, 0.3);
+    color: white;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-2xl;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.36);
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300;
+  }
+
+  .glass-card-hover:hover {
+    @apply bg-white/[0.06] border-brand-blue/30;
+    box-shadow: 0 8px 32px 0 rgba(0, 240, 255, 0.1);
+    transform: translateY(-4px);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-blue to-indigo-400;
+  }
+
+  .btn-primary {
+    @apply relative overflow-hidden bg-brand-blue text-brand-black font-semibold px-8 py-4 rounded-full 
+           transition-all duration-300 hover:shadow-[0_0_40px_rgba(0,240,255,0.4)] hover:scale-105
+           active:scale-95;
+  }
+
+  .btn-outline {
+    @apply relative border border-white/20 text-white font-medium px-8 py-4 rounded-full
+           transition-all duration-300 hover:border-brand-blue hover:text-brand-blue
+           hover:bg-brand-blue/5;
+  }
+
+  .section-padding {
+    @apply py-24 md:py-32 px-4 sm:px-6 lg:px-8;
+  }
+
+  .container-tight {
+    @apply max-w-7xl mx-auto;
+  }
+
+  .heading-1 {
+    @apply text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight leading-[1.1];
+  }
+
+  .heading-2 {
+    @apply text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight;
+  }
+
+  .heading-3 {
+    @apply text-xl sm:text-2xl font-semibold tracking-tight;
+  }
+
+  .body-large {
+    @apply text-lg md:text-xl text-zinc-400 leading-relaxed;
+  }
+
+  .body-small {
+    @apply text-sm text-zinc-500 leading-relaxed;
+  }
+}
+
+@layer utilities {
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+}
