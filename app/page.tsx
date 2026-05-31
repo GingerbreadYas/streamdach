@@ -1,8 +1,8 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Script from 'next/script'
-import { 
-  Play, Tv, Film, Trophy, Monitor, Globe, 
+import {  
+  Play, Tv, Film, Trophy, Monitor, Globe,  
   Gamepad2, ArrowRight, Star, Users, Clock, Award, MessageCircle
 } from 'lucide-react'
 import { PAGE_SEO } from '@/lib/seo'
@@ -188,7 +188,12 @@ export default function HomePage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
             {PRICING.map((plan, i) => (
-              <PricingCard key={plan.id} {...plan} index={i} />
+              <PricingCard 
+                key={plan.id} 
+                {...plan} 
+                features={[...plan.features]} 
+                index={i} 
+              />
             ))}
           </div>
 
